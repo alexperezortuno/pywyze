@@ -29,9 +29,8 @@ class Wyze:
     def get_credentials(cls):
         response: Any
         connect = Client().login(
-            email=os.environ["WYZE_EMAIL"],
-            password=os.environ["WYZE_PASSWORD"],
-            totp_key=os.environ["WYZE_MFA_CODE"])
+            email=os.getenv("WYZE_EMAIL", ""),
+            password=os.getenv("WYZE_PASSWORD", ""),)
         response = connect.data
 
         return response
@@ -52,23 +51,23 @@ class Wyze:
         return client.devices_list()
 
     def start(self):
+        video_stream = VideoCameras(self.params)
         if self.access_token == '':
             get_data = self.get_credentials()
             self.access_token = get_data['access_token']
             self.refresh_token = get_data['access_token']
 
-        if self.params['devices']:
-            devices: list = self.get_devices()
-            if len(devices) == 0:
-                self.logger.info('No have devices')
-                return None
+        devices: list = self.get_devices()
+        if len(devices) == 0:
+            self.logger.info('No have devices')
+            return None
 
-            for device in devices:
-                self.logger.info(f'MAC: {device.mac}')
-                self.logger.info(f'nickname: {device.nickname}')
-                self.logger.info(f'is_online: {device.is_online}')
-                self.logger.info(f'IP: {device.ip}')
-                self.logger.info(f'product_model: {device.product.model}')
+        for device in devices:
+            if self.params['show_devices']:
+                self.logger.info(f'MAC: {device.mac}|nickname: {device.nickname}|product_model: {device.product.model}|IP: {device.ip}|is_online: {device.is_online}')
 
-        video_stream = VideoCameras()
-        video_stream.get_cam()
+            if self.params['stream'] and device.is_online:
+                video_stream.start_cam({'ip': device.ip, 'name': device.nickname})
+
+        # video_stream.get_cam()
+

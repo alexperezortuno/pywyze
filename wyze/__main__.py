@@ -15,7 +15,8 @@ if __name__ == "__main__":
         subparser = parser.add_subparsers(title='Script select', dest='script_type')
         parser.version = '0.0.0'
         parser.add_argument("-v", "--version", action="version")
-        parser.add_argument("-d", "--devices", type=bool, default=False)
+        parser.add_argument("-d", "--show-devices", type=bool, default=False)
+        parser.add_argument("-s", "--stream", type=bool, default=False)
         parser.add_argument("--log_level", type=str, default=log_lvl)
         parser.add_argument("--log_format", type=str, default=log_str)
         params: Dict = vars(parser.parse_args())
